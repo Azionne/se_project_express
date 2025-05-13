@@ -1,12 +1,15 @@
+const validator = require("validator");
 const User = require("../models/user");
 // GET /users
 
-const getUsers = (req, res) => {
+const getUser = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => {
+      return res.status(200).send(users); // Explicitly return the response
+    })
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: err.message }); // Explicitly return the response
     });
 };
 const validator = require("validator");
