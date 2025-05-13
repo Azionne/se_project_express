@@ -1,5 +1,5 @@
 const User = require("../models/user");
-//GET /users
+// GET /users
 
 const getUsers = (req, res) => {
   User.find({})
@@ -9,37 +9,33 @@ const getUsers = (req, res) => {
       return res.status(500).send({ message: err.message });
     });
 };
+const validator = require("validator");
 
-//POST /users
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
+
+  // Validate the name field
+  if (!name || name.length < 2 || name.length > 30) {
+    return res
+      .status(400)
+      .send({ message: "Name must be between 2 and 30 characters long" });
+  }
+
+  // Validate the avatar field
+  if (!avatar || !validator.isURL(avatar)) {
+    return res.status(400).send({ message: "Avatar must be a valid URL" });
+  }
+
   User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      console.err(err);
+      console.error(err);
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: err.message });
       }
       return res
         .status(500)
-        .send({ message: "An Error occured on the server." });
+        .send({ message: "An error occurred on the server." });
     });
 };
-
-const getUser = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .orFail()
-    .then((user) => res.status(201).send(user))
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "User not found" });
-      } else if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid user ID format" });
-      }
-      return res.status(500).send({ message: err.message });
-    });
-};
-
 module.exports = { getUsers, createUser, getUser };
