@@ -2,14 +2,12 @@ const validator = require("validator");
 const User = require("../models/user");
 
 // GET /users
-const getUser = (req, res) => {
-  User.find({})
+const getUser = (req, res) => User.find({})
     .then((users) => res.status(200).send(users)) // Simplified return
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message }); // Explicit return
+      return res.status(500).send({ message: err.message });
     });
-};
 
 // POST /users
 const createUser = (req, res) => {
@@ -27,7 +25,8 @@ const createUser = (req, res) => {
     return res.status(400).send({ message: "Avatar must be a valid URL" });
   }
 
-  return User.create({ name, avatar })
+  // Create the user
+  return User.create({ name, avatar }) // Ensure return is present
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       console.error(err);
@@ -36,7 +35,7 @@ const createUser = (req, res) => {
       }
       return res
         .status(500)
-        .send({ message: "An error occurred on the server." }); // Explicit return
+        .send({ message: "An error occurred on the server." });
     });
 };
 
