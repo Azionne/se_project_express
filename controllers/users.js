@@ -1,7 +1,7 @@
 const validator = require("validator");
 const User = require("../models/user");
-// GET /users
 
+// GET /users
 const getUser = (req, res) => {
   User.find({})
     .then((users) => {
@@ -12,8 +12,8 @@ const getUser = (req, res) => {
       return res.status(500).send({ message: err.message }); // Explicitly return the response
     });
 };
-const validator = require("validator");
 
+// POST /users
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
@@ -41,4 +41,5 @@ const createUser = (req, res) => {
         .send({ message: "An error occurred on the server." });
     });
 };
-module.exports = { getUsers, createUser, getUser };
+
+module.exports = { getUser, createUser };
