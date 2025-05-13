@@ -4,12 +4,10 @@ const User = require("../models/user");
 // GET /users
 const getUser = (req, res) => {
   User.find({})
-    .then((users) => {
-      return res.status(200).send(users); // Explicitly return the response
-    })
+    .then((users) => res.status(200).send(users)) // Simplified return
     .catch((err) => {
       console.error(err);
-      return res.status(500).send({ message: err.message }); // Explicitly return the response
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -38,7 +36,7 @@ const createUser = (req, res) => {
       }
       return res
         .status(500)
-        .send({ message: "An error occurred on the server." });
+        .send({ message: "An error occurred on the server." }); // Explicit return
     });
 };
 
