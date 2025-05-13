@@ -19,7 +19,7 @@ app.use(routes);
 app.use("/", mainRouter);
 
 app.listen(PORT, () => {
-  console.log(`Listening on port ${PORT}`);
+  console.log(`Listening on Port ${PORT}`);
 }); //specific port receiving request
 
 app.use((req, res, next) => {
@@ -31,3 +31,4 @@ app.use((req, res, next) => {
     console.log(req.user._id); // _id will become accessible
   };
 });
+//add
