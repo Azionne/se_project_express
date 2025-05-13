@@ -27,7 +27,7 @@ const createUser = (req, res) => {
     return res.status(400).send({ message: "Avatar must be a valid URL" });
   }
 
-  User.create({ name, avatar })
+  return User.create({ name, avatar })
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       console.error(err);
