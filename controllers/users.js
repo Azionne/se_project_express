@@ -2,7 +2,8 @@ const validator = require("validator");
 const User = require("../models/user");
 
 // GET /users
-const getUser = (req, res) => User.find({})
+const getUser = (req, res) =>
+  User.find({})
     .then((users) => res.status(200).send(users)) // Simplified return
     .catch((err) => {
       console.error(err);
@@ -39,4 +40,20 @@ const createUser = (req, res) => {
     });
 };
 
-module.exports = { getUser, createUser };
+const getUserById = (req, res) => {
+  const { id } = req.params;
+  User.findById(id)
+    .orFail()
+    .then((user) => res.status(200).send(user))
+    .catch((err) => {
+      console.error(err);
+      // CastError: invalid ObjectId, DocumentNotFoundError: not found
+      if (err.name === "CastError" || err.name === "DocumentNotFoundError") {
+        return res.status(400).send({ message: "User not found" });
+      }
+      return res
+        .status(500)
+        .send({ message: "An error occurred on the server." });
+    });
+};
+module.exports = { getUser, createUser, getUserById };
