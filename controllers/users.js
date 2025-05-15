@@ -47,13 +47,18 @@ const getUserById = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       console.error(err);
-      // CastError: invalid ObjectId, DocumentNotFoundError: not found
-      if (err.name === "CastError" || err.name === "DocumentNotFoundError") {
-        return res.status(400).send({ message: "User not found" });
+      if (err.name === "CastError") {
+        // Invalid ObjectId format
+        return res.status(400).send({ message: "Invalid user ID" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        // Valid ObjectId, but not found in DB
+        return res.status(404).send({ message: "User not found" });
       }
       return res
         .status(500)
         .send({ message: "An error occurred on the server." });
     });
 };
+
 module.exports = { getUser, createUser, getUserById };

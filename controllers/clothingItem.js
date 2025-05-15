@@ -1,19 +1,18 @@
 const ClothingItem = require("../models/clothingItem");
+const mongoose = require("mongoose");
 
 //POST
 const createItem = (req, res) => {
-  console.log(req);
-  console.log(req.body);
-
   const { name, weather, imageUrl } = req.body;
+  const owner = req.user._id; // Get owner from middleware
 
-  ClothingItem.create({ name, weather, imageUrl })
-    .then((item) => {
-      console.log(item);
-      res.status(200).send({ data: item });
-    })
+  ClothingItem.create({ name, weather, imageUrl, owner })
+    .then((item) => res.status(201).json(item))
     .catch((e) => {
-      res.status(500).send({ message: "Error from createItem", e });
+      if (e.name === "ValidationError") {
+        return res.status(400).json({ message: e.message });
+      }
+      res.status(500).json({ message: "Error from createItem", e });
     });
 };
 
@@ -39,19 +38,32 @@ const updateItem = (req, res) => {
 //DELETE
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  console.log(itemId);
+
+  // Validate itemId before querying the database
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).json({ message: "Invalid item ID" });
+  }
+
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then((item) => res.status(400).send({ data: item }))
-    .catch((e) =>
-      res.status(200).send({ message: "Error from deleteItem", e })
-    );
+    .then((item) => {
+      if (!item) {
+        return res.status(400).send({ message: "Item not found" });
+      }
+      res.status(200).send({ data: item });
+    })
+    .catch((e) => {
+      res.status(500).send({ message: "Error from deleteItem", e });
+    });
 };
 
 //PUT
 
 const likeItem = (req, res) => {
   const { itemId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).json({ message: "Invalid item ID" });
+  }
 
   ClothingItem.findByIdAndUpdate(
     itemId,
@@ -67,6 +79,11 @@ const likeItem = (req, res) => {
 
 const dislikeItem = (req, res) => {
   const { itemId } = req.params;
+
+  // Validate itemId before querying the database
+  if (!mongoose.Types.ObjectId.isValid(itemId)) {
+    return res.status(400).json({ message: "Invalid item ID" });
+  }
 
   ClothingItem.findByIdAndUpdate(
     itemId,

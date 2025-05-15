@@ -1,8 +1,6 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
-const userRoutes = require("./routes/users");
-//const itemRoutes = require("./routes/items");
 
 const app = express(); // Initialize the app
 const { PORT = 3001 } = process.env;
@@ -15,15 +13,13 @@ mongoose
   .catch(console.error);
 
 app.use(express.json()); // Middleware to parse JSON
-//app.use("/items", itemRoutes);
+
 app.use((req, _response, next) => {
   req.user = {
     _id: "682255cb2a5cc9620dd1e058",
   };
   next();
 });
-
-// Define routes
 
 app.use("/", mainRouter);
 
