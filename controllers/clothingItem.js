@@ -44,12 +44,13 @@ const deleteItem = (req, res) => {
   }
 
   ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      if (e.name === "DocumentNotFoundError") {
+    .then((item) => {
+      if (!item) {
         return res.status(404).json({ message: "Item not found" });
       }
+      res.status(200).send({ data: item });
+    })
+    .catch((e) => {
       res.status(500).send({ message: "Error from deleteItem", e });
     });
 };
@@ -88,18 +89,18 @@ const dislikeItem = (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res.status(400).json({ message: "Invalid item ID" });
   }
-
   ClothingItem.findByIdAndUpdate(
     itemId,
     { $pull: { likes: req.user._id } },
     { new: true }
   )
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => {
-      if (e.name === "DocumentNotFoundError") {
+    .then((item) => {
+      if (!item) {
         return res.status(404).json({ message: "Item not found" });
       }
+      res.status(200).send({ data: item });
+    })
+    .catch((e) => {
       res.status(500).send({ message: "Error from dislikeItem", e });
     });
 };
