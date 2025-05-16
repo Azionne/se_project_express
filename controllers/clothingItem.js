@@ -45,13 +45,12 @@ const deleteItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
-      // Always return 200, even if item was not found
-      res
-        .status(200)
-        .send({
-          data: item,
-          message: item ? "Item deleted" : "Item not found",
-        });
+      if (!item) {
+        // Status 404: Item not found
+        return res.status(404).send({ message: "Item not found" });
+      }
+      // Status 200: Item deleted successfully
+      res.status(200).send({ data: item });
     })
     .catch((e) => {
       res.status(500).send({ message: "Error from deleteItem", e });
@@ -100,9 +99,12 @@ const dislikeItem = (req, res) => {
   )
     .orFail()
     .then((item) => res.status(200).send({ data: item }))
-    .catch((e) =>
-      res.status(500).send({ message: "Error from dislikeItem", e })
-    );
+    .catch((e) => {
+      if (e.name === "DocumentNotFoundError") {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      res.status(500).send({ message: "Error from dislikeItem", e });
+    });
 };
 
 module.exports = {
