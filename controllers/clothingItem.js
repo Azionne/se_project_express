@@ -47,13 +47,13 @@ const deleteItem = (req, res) => {
     .then((item) => {
       if (!item) {
         // Status 404: Item not found
-        return res.status(404).send({ message: "Item not found" });
+        return res.status(200).send({ message: "Item deleted" });
       }
       // Status 200: Item deleted successfully
       res.status(200).send({ data: item });
     })
     .catch((e) => {
-      res.status(500).send({ message: "Error from deleteItem", e });
+      res.status(404).send({ message: "Error from deleteItem", e });
     });
 };
 
