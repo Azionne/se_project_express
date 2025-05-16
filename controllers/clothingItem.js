@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 
-// POST
 const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user._id; // Get owner from middleware
+  const owner = req.user._id;
 
   return ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => res.status(201).json(item))
@@ -12,11 +11,10 @@ const createItem = (req, res) => {
       if (e.name === "ValidationError") {
         return res.status(400).json({ message: e.message });
       }
-      res.status(500).json({ message: "Error from createItem", e });
+      return res.status(500).json({ message: "Error from createItem", e });
     });
 };
 
-// GET
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
@@ -39,7 +37,6 @@ const updateItem = (req, res) => {
     );
 };
 
-//DELETE
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -52,14 +49,12 @@ const deleteItem = (req, res) => {
       if (!item) {
         return res.status(404).json({ message: "Item not found" });
       }
-      res.status(200).send({ data: item });
+      return res.status(200).send({ data: item });
     })
     .catch((e) => {
       res.status(500).send({ message: "Error from deleteItem", e });
     });
 };
-
-// PUT
 
 const likeItem = (req, res) => {
   const { itemId } = req.params;
@@ -77,19 +72,16 @@ const likeItem = (req, res) => {
       if (!item) {
         return res.status(404).json({ message: "Item not found" });
       }
-      res.status(200).send({ data: item });
+      return res.status(200).send({ data: item });
     })
     .catch((e) => {
       res.status(500).json({ message: "Error from likeItem", e });
     });
 };
 
-//Disilike
-
 const dislikeItem = (req, res) => {
   const { itemId } = req.params;
 
-  // Validate itemId before querying the database
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res.status(400).json({ message: "Invalid item ID" });
   }
@@ -102,10 +94,10 @@ const dislikeItem = (req, res) => {
       if (!item) {
         return res.status(404).json({ message: "Item not found" });
       }
-      res.status(200).send({ data: item });
+      return res.status(200).send({ data: item });
     })
     .catch((e) => {
-      res.status(500).send({ message: "Error from dislikeItem", e });
+      return res.status(500).send({ message: "Error from dislikeItem", e });
     });
 };
 
