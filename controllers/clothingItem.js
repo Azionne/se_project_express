@@ -45,10 +45,13 @@ const deleteItem = (req, res) => {
 
   ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
-      if (!item) {
-        return res.status(404).send({ message: "Item not found" });
-      }
-      res.status(200).send({ data: item });
+      // Always return 200, even if item was not found
+      res
+        .status(200)
+        .send({
+          data: item,
+          message: item ? "Item deleted" : "Item not found",
+        });
     })
     .catch((e) => {
       res.status(500).send({ message: "Error from deleteItem", e });
