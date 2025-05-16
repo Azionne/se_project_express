@@ -39,18 +39,15 @@ const updateItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  // Status 400: Invalid ObjectId
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res.status(400).json({ message: "Invalid item ID" });
   }
 
   ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
-      // Status 404: Item not found
       if (!item) {
         return res.status(404).send({ message: "Item not found" });
       }
-      // Status 200: Item deleted successfully
       res.status(200).send({ data: item });
     })
     .catch((e) => {
