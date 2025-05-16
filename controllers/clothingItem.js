@@ -39,16 +39,18 @@ const updateItem = (req, res) => {
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
-  // Validate itemId before querying the database
+  // Status 400: Invalid ObjectId
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
     return res.status(400).json({ message: "Invalid item ID" });
   }
 
   ClothingItem.findByIdAndDelete(itemId)
     .then((item) => {
+      // Status 404: Item not found
       if (!item) {
-        return res.status(400).send({ message: "Item not found" });
+        return res.status(404).send({ message: "Item not found" });
       }
+      // Status 200: Item deleted successfully
       res.status(200).send({ data: item });
     })
     .catch((e) => {
@@ -70,9 +72,15 @@ const likeItem = (req, res) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
-    .orFail()
-    .then((item) => res.status(200).send({ data: item }))
-    .catch((e) => res.status(500).send({ message: "Error from likeItem", e }));
+    .then((item) => {
+      if (!item) {
+        return res.status(404).json({ message: "Item not found" });
+      }
+      res.status(200).send({ data: item });
+    })
+    .catch((e) => {
+      res.status(500).json({ message: "Error from likeItem", e });
+    });
 };
 
 //Disilike
