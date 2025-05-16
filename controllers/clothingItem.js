@@ -40,7 +40,7 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).json({ message: "Invalid item ID" });
+    return res.status(404).json({ message: "Item not found" });
   }
 
   ClothingItem.findByIdAndDelete(itemId)
