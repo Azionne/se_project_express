@@ -74,9 +74,9 @@ const likeItem = (req, res) => {
       }
       return res.status(200).send({ data: item });
     })
-    .catch((e) => {
-      res.status(500).json({ message: "Error from likeItem", e });
-    });
+    .catch((e) =>
+      res.status(500).send({ message: "Error from dislikeItem", e })
+    );
 };
 
 const dislikeItem = (req, res) => {
@@ -96,9 +96,9 @@ const dislikeItem = (req, res) => {
       }
       return res.status(200).send({ data: item });
     })
-    .catch((e) => {
-      return res.status(500).send({ message: "Error from dislikeItem", e });
-    });
+    .catch((e) =>
+      res.status(500).send({ message: "Error from dislikeItem", e })
+    );
 };
 
 module.exports = {
