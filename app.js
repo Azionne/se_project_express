@@ -1,6 +1,7 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const mainRouter = require("./routes/index");
+const cors = require("cors");
 
 const app = express(); // Initialize the app
 const { PORT = 3001 } = process.env;
@@ -26,3 +27,4 @@ app.use("/", mainRouter);
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 }); // specific port receiving request
+app.use(cors());

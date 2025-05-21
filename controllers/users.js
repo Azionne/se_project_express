@@ -1,16 +1,24 @@
 const validator = require("validator");
 const User = require("../models/user");
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
 
 // GET /users
-const getUser = (req, res) =>
-  User.find({})
-    .then((users) => res.status(200).send(users)) // Simplified return
-    .catch((err) => {
-      console.error(err);
-      return res.status(500).send({ message: err.message });
-    });
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+      res.status(200).send(user);
+    })
+    .catch((e) =>
+      res.status(500).send({ message: "Error from getCurrentUser", e })
+    );
+};
 
 // POST /users
+
 const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
@@ -25,6 +33,32 @@ const createUser = (req, res) => {
   if (!avatar || !validator.isURL(avatar)) {
     return res.status(400).send({ message: "Avatar must be a valid URL" });
   }
+  const { password } = req.body;
+
+  // Validate the password field
+  if (!password || password.length < 8) {
+    return res
+      .status(400)
+      .send({ message: "Password must be at least 8 characters long" });
+  }
+
+  return bcrypt
+    .hash(password, 10)
+    .then((hash) => User.create({ name, avatar, password: hash }))
+    .then((user) => {
+      const userObj = user.toObject();
+      delete userObj.password;
+      res.status(201).send(userObj);
+    })
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
+      }
+      return res
+        .status(500)
+        .send({ message: "An error occurred on the server." });
+    });
 
   // Create the user
   return User.create({ name, avatar }) // Ensure return is present
@@ -37,6 +71,29 @@ const createUser = (req, res) => {
       return res
         .status(500)
         .send({ message: "An error occurred on the server." });
+    });
+};
+
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).send({ message: "Email and password are required" });
+  }
+
+  return User.findUserByCredentials({ email, password })
+    .then((user) => {
+      if (!user) {
+        return res.status(401).send({ message: "Incorrect email or password" });
+      }
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: "7d",
+      });
+      return res.status(200).json({ token });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(401).send({ message: "Incorrect email or password" });
     });
 };
 
@@ -61,4 +118,36 @@ const getUserById = (req, res) => {
     });
 };
 
-module.exports = { getUser, createUser, getUserById };
+//PATCH
+const updateProfile = (req, res) => {
+  const { name, avatar } = req.body;
+
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, avatar },
+    {
+      new: true, // return the updated document
+      runValidators: true, // enable schema validation
+    }
+  )
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
+      }
+      res.status(500).send({ message: "Error from updateProfile", err });
+    });
+};
+
+module.exports = {
+  getCurrentUser,
+  createUser,
+  getUserById,
+  login,
+  updateProfile,
+};

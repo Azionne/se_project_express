@@ -1,0 +1,27 @@
+const jwt = require("jsonwebtoken");
+const { JWT_SECRET } = require("../utils/config");
+
+module.exports = (req, res, next) => {
+  // Get the Authorization header
+  const { authorization } = req.headers;
+
+  if (!authorization || !authorization.startsWith("Bearer ")) {
+    return res.status(401).send({ message: "Authorization required" });
+  }
+
+  const token = authorization.replace("Bearer ", "");
+
+  let payload;
+  try {
+    payload = jwt.verify(token, JWT_SECRET);
+  } catch (err) {
+    return res.status(401).send({ message: "Authorization required" });
+  }
+
+  req.user = payload; // Add user payload to request
+  next();
+};
+/*
+  Remove the hard-coded user object middleware.
+  No additional code is needed here since the JWT middleware above already sets req.user.
+*/
