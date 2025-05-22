@@ -8,14 +8,16 @@ const {
 } = require("../controllers/users");
 const usersRoute = require("./users");
 const clothingItem = require("./clothingItem");
-const auth = require("../middlewares/auth.js");
+const auth = require("../middlewares/auth");
 
 // Public routes
+
 router.post("/signin", login);
 router.post("/signup", createUser);
 router.use("/items", clothingItem);
 
 // Protect all routes below this line
+
 router.use(auth);
 
 router.use("/users", usersRoute);

@@ -5,18 +5,18 @@ const { JWT_SECRET } = require("../utils/config");
 const bcrypt = require("bcrypt");
 
 // GET /users
-const getCurrentUser = (req, res) => {
-  return User.findById(req.user._id)
+
+const getCurrentUser = (req, res) =>
+  User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }
-      res.status(200).send(user);
+      return res.status(200).send(user);
     })
     .catch((e) =>
       res.status(500).send({ message: "Error from getCurrentUser", e })
     );
-};
 
 // POST /users
 
@@ -24,6 +24,7 @@ const createUser = (req, res) => {
   const { name, avatar } = req.body;
 
   // Validate the name field
+
   if (!name || name.length < 2 || name.length > 30) {
     return res
       .status(400)
@@ -31,12 +32,14 @@ const createUser = (req, res) => {
   }
 
   // Validate the avatar field
+
   if (!avatar || !validator.isURL(avatar)) {
     return res.status(400).send({ message: "Avatar must be a valid URL" });
   }
   const { password } = req.body;
 
   // Validate the password field
+
   if (!password || password.length < 8) {
     return res
       .status(400)
@@ -51,19 +54,6 @@ const createUser = (req, res) => {
       delete userObj.password;
       res.status(201).send(userObj);
     })
-    .catch((err) => {
-      console.error(err);
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
-      }
-      return res
-        .status(500)
-        .send({ message: "An error occurred on the server." });
-    });
-
-  // Create the user
-  return User.create({ name, avatar }) // Ensure return is present
-    .then((user) => res.status(201).send(user))
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
