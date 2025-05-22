@@ -2,10 +2,11 @@ const validator = require("validator");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
+const bcrypt = require("bcrypt");
 
 // GET /users
 const getCurrentUser = (req, res) => {
-  User.findById(req.user._id)
+  return User.findById(req.user._id)
     .then((user) => {
       if (!user) {
         return res.status(404).send({ message: "User not found" });
@@ -118,7 +119,7 @@ const getUserById = (req, res) => {
     });
 };
 
-//PATCH
+// PATCH
 const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
 
@@ -140,7 +141,7 @@ const updateProfile = (req, res) => {
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: err.message });
       }
-      res.status(500).send({ message: "Error from updateProfile", err });
+      return res.status(500).send({ message: "Error from updateProfile", err });
     });
 };
 

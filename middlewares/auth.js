@@ -19,9 +19,5 @@ module.exports = (req, res, next) => {
   }
 
   req.user = payload; // Add user payload to request
-  next();
+  return next();
 };
-/*
-  Remove the hard-coded user object middleware.
-  No additional code is needed here since the JWT middleware above already sets req.user.
-*/
