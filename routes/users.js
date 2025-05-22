@@ -1,20 +1,27 @@
 const express = require("express");
+const router = express.Router();
 const {
-  updateProfile,
-  getCurrentUser,
+  login,
   createUser,
-  getUserById,
+  getCurrentUser,
+  updateProfile,
 } = require("../controllers/users");
+const clothingItem = require("./clothingItem");
 const auth = require("../middlewares/auth");
 
-const router = express.Router();
+// Public routes
+router.post("/signin", login);
+router.post("/signup", createUser);
+router.use("/items", clothingItem);
 
-// Signup route (no auth)
-router.post("/", createUser);
+// Protect all routes below this line
+router.use(auth);
 
-// Protected routes
-router.get("/me", auth, getCurrentUser);
-router.patch("/me/update", auth, updateProfile);
-router.get("/:id", auth, getUserById);
+router.get("/me", getCurrentUser);
+router.patch("/me", updateProfile);
+
+router.use((req, res) => {
+  res.status(404).send({ message: "Router not found" });
+});
 
 module.exports = router;
