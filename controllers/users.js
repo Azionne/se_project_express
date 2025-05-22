@@ -2,7 +2,6 @@ const validator = require("validator");
 const User = require("../models/user");
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
-const bcrypt = require("bcryptjs");
 
 // GET /users
 const getCurrentUser = (req, res) => {
@@ -21,32 +20,20 @@ const getCurrentUser = (req, res) => {
 // POST /users
 
 const createUser = (req, res) => {
-  const { name, avatar, password, email } = req.body;
+  const { name, avatar } = req.body;
 
   // Validate the name field
-  if (
-    !name ||
-    typeof name !== "string" ||
-    name.length < 2 ||
-    name.length > 30
-  ) {
+  if (!name || name.length < 2 || name.length > 30) {
     return res
       .status(400)
       .send({ message: "Name must be between 2 and 30 characters long" });
   }
 
-  // Validate the email field
-  if (!email || !validator.isEmail(email)) {
-    return res
-      .status(400)
-      .send({ message: "Email must be a valid email address" });
+  // Validate the avatar field
+  if (!avatar || !validator.isURL(avatar)) {
+    return res.status(400).send({ message: "Avatar must be a valid URL" });
   }
-
-  // Validate the avatar field only if provided
-  if (avatar && !validator.isURL(avatar)) {
-    res.status(400).send({ message: "Avatar must be a valid URL" });
-    return;
-  }
+  const { password } = req.body;
 
   // Validate the password field
   if (!password || password.length < 8) {
@@ -57,19 +44,29 @@ const createUser = (req, res) => {
 
   return bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, password: hash, email }))
+    .then((hash) => User.create({ name, avatar, password: hash }))
     .then((user) => {
-      // Respond with the user's _id, name, and avatar
-      res.status(201).json({ _id: user._id, name, avatar, email });
+      const userObj = user.toObject();
+      delete userObj.password;
+      res.status(201).send(userObj);
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: err.message });
       }
-      if (err.code === 11000) {
-        // Duplicate email error
-        return res.status(409).send({ message: "Email already exists" });
+      return res
+        .status(500)
+        .send({ message: "An error occurred on the server." });
+    });
+
+  // Create the user
+  return User.create({ name, avatar }) // Ensure return is present
+    .then((user) => res.status(201).send(user))
+    .catch((err) => {
+      console.error(err);
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
       }
       return res
         .status(500)
