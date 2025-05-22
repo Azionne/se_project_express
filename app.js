@@ -6,6 +6,9 @@ const cors = require("cors");
 const app = express(); // Initialize the app
 const { PORT = 3001 } = process.env;
 
+app.use(express.json()); // Middleware to parse JSON
+app.use("/", mainRouter);
+
 mongoose
   .connect("mongodb://127.0.0.1:27017/wtwr_db")
   .then(() => {
@@ -13,16 +16,12 @@ mongoose
   })
   .catch(console.error);
 
-app.use(express.json()); // Middleware to parse JSON
-
 app.use((req, _response, next) => {
   req.user = {
     _id: "682255cb2a5cc9620dd1e058",
   };
   next();
 });
-
-app.use("/", mainRouter);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
