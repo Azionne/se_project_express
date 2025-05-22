@@ -10,8 +10,6 @@ const usersRoute = require("./users");
 const clothingItem = require("./clothingItem");
 const auth = require("../middlewares/auth");
 
-// Public routes
-
 router.post("/signin", login);
 router.post("/signup", createUser);
 router.use("/items", clothingItem);
