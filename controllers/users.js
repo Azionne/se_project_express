@@ -6,6 +6,15 @@ const { JWT_SECRET } = require("../utils/config");
 
 // GET /users
 
+const getUsers = (req, res) => {
+  User.find({})
+    .then((users) => res.status(200).send(users))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send({ message: "Error from getUsers", err });
+    });
+};
+
 const getCurrentUser = (req, res) =>
   User.findById(req.user._id)
     .then((user) => {
@@ -31,8 +40,8 @@ const createUser = (req, res) => {
       .json({ message: "Name must be between 2 and 30 characters long" });
   }
 
-  // Validate the avatar field
-  if (!avatar || !validator.isURL(avatar)) {
+  // Validate the avatar field (optional or must be a valid URL if provided)
+  if (avatar && !validator.isURL(avatar)) {
     return res.status(400).json({ message: "Avatar must be a valid URL" });
   }
 
@@ -138,14 +147,18 @@ const updateProfile = (req, res) => {
       return res.status(200).send(user);
     })
     .catch((err) => {
+      console.error(err);
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: err.message });
       }
-      return res.status(500).send({ message: "Error from updateProfile", err });
+      return res
+        .status(500)
+        .send({ message: "An error occurred on the server." });
     });
 };
 
 module.exports = {
+  getUsers,
   getCurrentUser,
   createUser,
   getUserById,
