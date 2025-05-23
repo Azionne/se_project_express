@@ -20,6 +20,13 @@ router.use("/users", usersRoute);
 
 router.use(auth);
 
+router.use((req, res, next) => {
+  // Only set for protected routes
+  req.user = { _id: "5d8b8592978f8bd833ca8133" };
+  next();
+});
+
+// Then define protected routes below
 router.get("/me", getCurrentUser);
 router.patch("/me", updateProfile);
 
