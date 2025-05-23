@@ -111,7 +111,9 @@ const getUserById = (req, res) => {
       if (!user) {
         return res.status(404).send({ message: "User not found" });
       }
-      return res.status(200).send(user);
+      // Only return the required fields
+      const { _id, name, avatar, email } = user;
+      return res.status(200).json({ _id, name, avatar, email });
     })
     .catch((err) => {
       if (err.name === "CastError") {
