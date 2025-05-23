@@ -34,11 +34,9 @@ const createUser = (req, res) => {
 
   // Validate name
   if (typeof name !== "string" || name.length < 2 || name.length > 30) {
-    return res
-      .status(400)
-      .json({
-        message: "Name must be a string between 2 and 30 characters long",
-      });
+    return res.status(400).json({
+      message: "Name must be a string between 2 and 30 characters long",
+    });
   }
 
   // Validate avatar (optional, but if present must be a valid URL)
@@ -109,17 +107,16 @@ const login = (req, res) => {
 const getUserById = (req, res) => {
   const { id } = req.params;
   User.findById(id)
-    .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+      return res.status(200).send(user);
+    })
     .catch((err) => {
-      console.error(err);
       if (err.name === "CastError") {
         // Invalid ObjectId format
         return res.status(400).send({ message: "Invalid user ID" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        // Valid ObjectId, but not found in DB
-        return res.status(404).send({ message: "User not found" });
       }
       return res
         .status(500)
