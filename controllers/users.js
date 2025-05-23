@@ -21,7 +21,6 @@ const getCurrentUser = (req, res) =>
 // POST /users
 
 const createUser = (req, res) => {
-  console.log("BODY RECEIVED:", req.body);
   const { name, avatar, password } = req.body;
 
   // Validate the name field
@@ -47,17 +46,9 @@ const createUser = (req, res) => {
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, password: hash }))
     .then((user) => {
-      const userObj = user.toObject();
-      delete userObj.password;
-      // Respond with 201 and include form data and _id
-      res.status(201).json({
-        _id: userObj._id,
-        name: userObj.name,
-        avatar: userObj.avatar,
-      });
+      res.status(201).json({ _id: user._id });
     })
     .catch((err) => {
-      console.error(err);
       if (err.name === "ValidationError") {
         return res.status(400).json({ message: err.message });
       }
