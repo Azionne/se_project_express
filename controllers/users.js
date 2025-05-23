@@ -21,6 +21,7 @@ const getCurrentUser = (req, res) =>
 // POST /users
 
 const createUser = (req, res) => {
+  console.log("BODY RECEIVED:", req.body);
   const { name, avatar, password } = req.body;
 
   // Validate the name field
