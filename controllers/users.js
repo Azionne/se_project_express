@@ -8,10 +8,10 @@ const { JWT_SECRET } = require("../utils/config");
 
 const getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(200).send(users))
+    .then((users) => res.status(200).json({ data: users }))
     .catch((err) => {
       console.error(err);
-      res.status(500).send({ message: "Error from getUsers", err });
+      res.status(500).json({ message: "Error from getUsers", err });
     });
 };
 
@@ -32,35 +32,66 @@ const getCurrentUser = (req, res) =>
 const createUser = (req, res) => {
   const { name, avatar, password, email } = req.body;
 
-  if (!name || !email || !password) {
-    return res.status(400).send({ message: "All fields must be provided" });
+  // Validate name
+  if (typeof name !== "string" || name.length < 2) {
+    return res.status(400).json({
+      message: "Name must be at least 2 characters long",
+    });
+  }
+  if (name.length > 30) {
+    return res.status(400).json({
+      message: "Name must be at most 30 characters long",
+    });
+  }
+
+  // Validate avatar
+  if (avatar && (typeof avatar !== "string" || !validator.isURL(avatar))) {
+    return res.status(400).json({ message: "Avatar must be a valid URL" });
+  }
+
+  // Validate email
+  if (typeof email !== "string" || !validator.isEmail(email)) {
+    return res
+      .status(400)
+      .json({ message: "Email must be a valid email address" });
+  }
+
+  // Validate password
+  if (typeof password !== "string" || password.length < 8) {
+    return res
+      .status(400)
+      .json({ message: "Password must be at least 8 characters long" });
   }
 
   bcrypt
     .hash(password, 10)
-    .then((hash) =>
-      User.create({
-        name,
-        avatar: avatar || "", // Provide default if not supplied
-        email,
-        password: hash,
-      })
-    )
-    .then((user) => {
-      res.status(201).send({
-        _id: user._id,
-        name: user.name,
-        avatar: user.avatar,
-        email: user.email,
+    .then((hash) => {
+      return User.findOne({ email }).then((existingUser) => {
+        if (existingUser) {
+          return res.status(409).json({ message: "Email already exists" });
+        }
+        return User.create({ name, avatar, email, password: hash }).then(
+          (user) => {
+            res.status(200).json({
+              // <-- status 200 for success
+              _id: user._id,
+              name: user.name,
+              avatar: user.avatar,
+              email: user.email,
+            });
+          }
+        );
       });
     })
     .catch((err) => {
+      console.error(err);
       if (err.code === 11000) {
-        return res.status(409).send({ message: "Email already exists" });
+        return res.status(409).json({ message: "Email already exists" });
       }
-      return res
-        .status(500)
-        .send({ message: "An error occurred on the server" });
+      if (err.name === "ValidationError") {
+        return res.status(400).json({ message: err.message });
+      }
+      res.status(500).json({ message: "An error occurred on the server." });
     });
 };
 
@@ -117,24 +148,26 @@ const updateProfile = (req, res) => {
     req.user._id,
     { name, avatar },
     {
-      new: true, // return the updated document
-      runValidators: true, // enable schema validation
+      new: true,
+      runValidators: true,
     }
   )
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
       }
-      return res.status(200).send(user);
+      // Only return the required fields
+      const { _id, name, avatar, email } = user;
+      return res.status(200).json({ _id, name, avatar, email });
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(400).json({ message: err.message });
       }
       return res
         .status(500)
-        .send({ message: "An error occurred on the server." });
+        .json({ message: "An error occurred on the server." });
     });
 };
 
