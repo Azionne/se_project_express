@@ -21,7 +21,8 @@ const getCurrentUser = (req, res) =>
 // POST /users
 
 const createUser = (req, res) => {
-  const { name, avatar, password } = req.body;
+  console.log("BODY RECEIVED:", req.body);
+  const { name, avatar, password, email } = req.body;
 
   // Validate the name field
   if (!name || name.length < 2 || name.length > 30) {
@@ -35,6 +36,13 @@ const createUser = (req, res) => {
     return res.status(400).json({ message: "Avatar must be a valid URL" });
   }
 
+  // Validate the email field
+  if (!email || !validator.isEmail(email)) {
+    return res
+      .status(400)
+      .json({ message: "Email must be a valid email address" });
+  }
+
   // Validate the password field
   if (!password || password.length < 8) {
     return res
@@ -44,11 +52,20 @@ const createUser = (req, res) => {
 
   return bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, password: hash }))
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
-      res.status(201).json({ _id: user._id });
+      const userObj = user.toObject();
+      delete userObj.password;
+      // Respond with 201 and include all form data except password
+      res.status(201).json({
+        _id: userObj._id,
+        name: userObj.name,
+        avatar: userObj.avatar,
+        email: userObj.email,
+      });
     })
     .catch((err) => {
+      console.error(err);
       if (err.name === "ValidationError") {
         return res.status(400).json({ message: err.message });
       }
