@@ -32,37 +32,22 @@ const getCurrentUser = (req, res) =>
 const createUser = (req, res) => {
   const { name, avatar, password, email } = req.body;
 
-  // Validate name
-  if (typeof name !== "string" || name.length < 2 || name.length > 30) {
-    return res.status(400).json({
-      message: "Name must be a string between 2 and 30 characters long",
-    });
-  }
-
-  // Validate avatar (optional, but if present must be a valid URL)
-  if (avatar && (typeof avatar !== "string" || !validator.isURL(avatar))) {
-    return res.status(400).json({ message: "Avatar must be a valid URL" });
-  }
-
-  // Validate email
-  if (typeof email !== "string" || !validator.isEmail(email)) {
-    return res
-      .status(400)
-      .json({ message: "Email must be a valid email address" });
-  }
-
-  // Validate password
-  if (typeof password !== "string" || password.length < 8) {
-    return res
-      .status(400)
-      .json({ message: "Password must be at least 8 characters long" });
+  if (!name || !email || !password) {
+    return res.status(400).send({ message: "All fields must be provided" });
   }
 
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, avatar, email, password: hash }))
+    .then((hash) =>
+      User.create({
+        name,
+        avatar: avatar || "", // Provide default if not supplied
+        email,
+        password: hash,
+      })
+    )
     .then((user) => {
-      res.status(201).json({
+      res.status(201).send({
         _id: user._id,
         name: user.name,
         avatar: user.avatar,
@@ -70,14 +55,12 @@ const createUser = (req, res) => {
       });
     })
     .catch((err) => {
-      console.error(err);
       if (err.code === 11000) {
-        return res.status(409).json({ message: "Email already exists" });
+        return res.status(409).send({ message: "Email already exists" });
       }
-      if (err.name === "ValidationError") {
-        return res.status(400).json({ message: err.message });
-      }
-      res.status(500).json({ message: "An error occurred on the server." });
+      return res
+        .status(500)
+        .send({ message: "An error occurred on the server" });
     });
 };
 
