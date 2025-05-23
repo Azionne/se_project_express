@@ -6,22 +6,13 @@ const {
   getCurrentUser,
   updateProfile,
 } = require("../controllers/users");
-const clothingItem = require("./clothingItem");
-const auth = require("../middlewares/auth");
 
-// Public routes
-router.post("/signin", login);
-router.post("/signup", createUser);
-router.use("/items", clothingItem);
-
-// Protect all routes below this line
-router.use(auth);
+// Get current user logged in
 
 router.get("/me", getCurrentUser);
-router.patch("/me", updateProfile);
 
-router.use((req, res) => {
-  res.status(404).send({ message: "Router not found" });
-});
+// Update current logged in profile
+
+router.patch("/me", updateProfile);
 
 module.exports = router;
