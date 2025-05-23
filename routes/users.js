@@ -7,6 +7,8 @@ const {
   updateProfile,
 } = require("../controllers/users");
 
+const User = require("../models/user");
+
 // Public signup route
 router.post("/", createUser);
 
