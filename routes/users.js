@@ -7,12 +7,13 @@ const {
   updateProfile,
 } = require("../controllers/users");
 
-// Get current user logged in
+// Public signup route
+router.post("/", createUser);
 
+// Get current user logged in
 router.get("/me", getCurrentUser);
 
 // Update current logged in profile
-
 router.patch("/me", updateProfile);
 
 module.exports = router;

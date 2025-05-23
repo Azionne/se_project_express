@@ -14,12 +14,12 @@ const auth = require("../middlewares/auth");
 router.post("/signin", login);
 router.post("/signup", createUser);
 router.use("/items", clothingItem);
+router.use("/users", usersRoute);
 
 // Protect all routes below this line
 
 router.use(auth);
 
-router.use("/users", usersRoute);
 router.get("/me", getCurrentUser);
 router.patch("/me", updateProfile);
 
