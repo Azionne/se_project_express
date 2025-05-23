@@ -30,57 +30,56 @@ const getCurrentUser = (req, res) =>
 // POST /users
 
 const createUser = (req, res) => {
-  console.log("BODY RECEIVED:", req.body);
   const { name, avatar, password, email } = req.body;
 
-  // Validate the name field
-  if (!name || name.length < 2 || name.length > 30) {
+  // Validate name
+  if (typeof name !== "string" || name.length < 2 || name.length > 30) {
     return res
       .status(400)
-      .json({ message: "Name must be between 2 and 30 characters long" });
+      .json({
+        message: "Name must be a string between 2 and 30 characters long",
+      });
   }
 
-  // Validate the avatar field (optional or must be a valid URL if provided)
-  if (avatar && !validator.isURL(avatar)) {
+  // Validate avatar (optional, but if present must be a valid URL)
+  if (avatar && (typeof avatar !== "string" || !validator.isURL(avatar))) {
     return res.status(400).json({ message: "Avatar must be a valid URL" });
   }
 
-  // Validate the email field
-  if (!email || !validator.isEmail(email)) {
+  // Validate email
+  if (typeof email !== "string" || !validator.isEmail(email)) {
     return res
       .status(400)
       .json({ message: "Email must be a valid email address" });
   }
 
-  // Validate the password field
-  if (!password || password.length < 8) {
+  // Validate password
+  if (typeof password !== "string" || password.length < 8) {
     return res
       .status(400)
       .json({ message: "Password must be at least 8 characters long" });
   }
 
-  return bcrypt
+  bcrypt
     .hash(password, 10)
     .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
-      const userObj = user.toObject();
-      delete userObj.password;
-      // Respond with 201 and include all form data except password
       res.status(201).json({
-        _id: userObj._id,
-        name: userObj.name,
-        avatar: userObj.avatar,
-        email: userObj.email,
+        _id: user._id,
+        name: user.name,
+        avatar: user.avatar,
+        email: user.email,
       });
     })
     .catch((err) => {
       console.error(err);
+      if (err.code === 11000) {
+        return res.status(409).json({ message: "Email already exists" });
+      }
       if (err.name === "ValidationError") {
         return res.status(400).json({ message: err.message });
       }
-      return res
-        .status(500)
-        .json({ message: "An error occurred on the server." });
+      res.status(500).json({ message: "An error occurred on the server." });
     });
 };
 
