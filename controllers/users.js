@@ -21,29 +21,25 @@ const getCurrentUser = (req, res) =>
 // POST /users
 
 const createUser = (req, res) => {
-  const { name, avatar } = req.body;
+  const { name, avatar, password } = req.body;
 
   // Validate the name field
-
   if (!name || name.length < 2 || name.length > 30) {
     return res
       .status(400)
-      .send({ message: "Name must be between 2 and 30 characters long" });
+      .json({ message: "Name must be between 2 and 30 characters long" });
   }
 
   // Validate the avatar field
-
   if (!avatar || !validator.isURL(avatar)) {
-    return res.status(400).send({ message: "Avatar must be a valid URL" });
+    return res.status(400).json({ message: "Avatar must be a valid URL" });
   }
-  const { password } = req.body;
 
   // Validate the password field
-
   if (!password || password.length < 8) {
     return res
       .status(400)
-      .send({ message: "Password must be at least 8 characters long" });
+      .json({ message: "Password must be at least 8 characters long" });
   }
 
   return bcrypt
@@ -52,16 +48,21 @@ const createUser = (req, res) => {
     .then((user) => {
       const userObj = user.toObject();
       delete userObj.password;
-      res.status(201).send(userObj);
+      // Respond with 201 and include form data and _id
+      res.status(201).json({
+        _id: userObj._id,
+        name: userObj.name,
+        avatar: userObj.avatar,
+      });
     })
     .catch((err) => {
       console.error(err);
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res.status(400).json({ message: err.message });
       }
       return res
         .status(500)
-        .send({ message: "An error occurred on the server." });
+        .json({ message: "An error occurred on the server." });
     });
 };
 
