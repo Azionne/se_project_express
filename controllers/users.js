@@ -15,18 +15,24 @@ const getUsers = (req, res) => {
     });
 };
 
-const getCurrentUser = (req, res) =>
+const getCurrentUser = (req, res) => {
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({ message: "Authorization required" });
+  }
+
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: "User not found" });
+        return res.status(404).json({ message: "User not found" });
       }
-      return res.status(200).send(user);
+      // Only return the required fields
+      const { _id, name, avatar, email } = user;
+      return res.status(200).json({ _id, name, avatar, email });
     })
     .catch((e) =>
-      res.status(500).send({ message: "Error from getCurrentUser", e })
+      res.status(500).json({ message: "Error from getCurrentUser", e })
     );
-
+};
 // POST /users
 
 const createUser = (req, res) => {
@@ -63,17 +69,19 @@ const createUser = (req, res) => {
       .json({ message: "Password must be at least 8 characters long" });
   }
 
-  bcrypt
-    .hash(password, 10)
-    .then((hash) => {
-      return User.findOne({ email }).then((existingUser) => {
-        if (existingUser) {
-          return res.status(409).json({ message: "Email already exists" });
-        }
+  // Check for duplicate email BEFORE hashing
+  User.findOne({ email }).then((existingUser) => {
+    if (existingUser) {
+      return res.status(409).json({ message: "Email already exists" });
+    }
+
+    // Only hash and create if all validation passes and email is unique
+    bcrypt
+      .hash(password, 10)
+      .then((hash) => {
         return User.create({ name, avatar, email, password: hash }).then(
           (user) => {
             res.status(200).json({
-              // <-- status 200 for success
               _id: user._id,
               name: user.name,
               avatar: user.avatar,
@@ -81,18 +89,15 @@ const createUser = (req, res) => {
             });
           }
         );
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.name === "ValidationError") {
+          return res.status(400).json({ message: err.message });
+        }
+        res.status(500).json({ message: "An error occurred on the server." });
       });
-    })
-    .catch((err) => {
-      console.error(err);
-      if (err.code === 11000) {
-        return res.status(409).json({ message: "Email already exists" });
-      }
-      if (err.name === "ValidationError") {
-        return res.status(400).json({ message: err.message });
-      }
-      res.status(500).json({ message: "An error occurred on the server." });
-    });
+  });
 };
 
 const login = (req, res) => {
@@ -168,6 +173,42 @@ const updateProfile = (req, res) => {
       return res
         .status(500)
         .json({ message: "An error occurred on the server." });
+    });
+};
+
+// controllers/users.js
+
+module.exports.addUser = (req, res) => {
+  const { email, password } = req.body;
+
+  // Check if the email already exists in the database
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
+        // Email already exists, return a 409 status with a message
+        return res.status(409).json({ message: "Email already exists" });
+      }
+
+      // If email doesn't exist, proceed to add new user
+      // Hash the password and save the user in the database
+      bcrypt
+        .hash(password, 10)
+        .then((hashedPassword) => {
+          const newUser = new User({ email, password: hashedPassword });
+
+          return newUser.save();
+        })
+        .then((savedUser) => {
+          res.status(201).json({ message: "User created successfully" });
+        })
+        .catch((err) => {
+          // Handle any errors that occur during hashing or saving
+          res.status(500).json({ message: "Internal server error" });
+        });
+    })
+    .catch((err) => {
+      // Handle any errors that occur during the email check
+      res.status(500).json({ message: "Internal server error" });
     });
 };
 
