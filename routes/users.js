@@ -9,20 +9,15 @@ const {
 } = require("../controllers/users");
 
 const User = require("../models/user");
-
-// Public signup route
-router.post("/", createUser);
-
-// Get all users
-router.get("/", getUsers);
-
-// Get user by id
-router.get("/:id", getUserById);
+const auth = require("../middlewares/auth");
 
 // Get current user logged in
-router.get("/me", getCurrentUser);
+router.get("/me", auth, getCurrentUser);
 
 // Update current logged in profile
-router.patch("/me", updateProfile);
+router.patch("/me", auth, updateProfile);
+
+// Create a new user
+router.post("/", auth, createUser);
 
 module.exports = router;

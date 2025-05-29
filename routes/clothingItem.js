@@ -1,5 +1,5 @@
-const router = require("express").Router();
-
+const express = require("express");
+const router = express.Router();
 const {
   createItem,
   getItems,
@@ -8,28 +8,16 @@ const {
   likeItem,
   dislikeItem,
 } = require("../controllers/clothingItem");
+const auth = require("../middlewares/auth");
 
-// CRUD
+// Protect the create route with auth middleware
+router.post("/", auth, createItem);
 
-// Create
-
-router.post("/", createItem);
-
-// Read
-
+// You can also protect other routes as needed
 router.get("/", getItems);
+router.patch("/:itemId", auth, updateItem);
+router.delete("/:itemId", auth, deleteItem);
+router.put("/:itemId/likes", auth, likeItem);
+router.delete("/:itemId/likes", auth, dislikeItem);
 
-// Update
-
-router.put("/:itemId", updateItem);
-
-// Delete
-
-router.delete("/:itemId", deleteItem);
-
-// Like
-router.put("/:itemId/likes", likeItem);
-
-// Dislike
-router.delete("/:itemId/likes", dislikeItem);
 module.exports = router;

@@ -1,7 +1,12 @@
 const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 
+// Ensure authentication middleware is used before these controllers in your route definitions
+
 const createItem = (req, res) => {
+  if (!req.user || !req.user._id) {
+    return res.status(401).json({ message: "Authorization required" });
+  }
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -44,12 +49,19 @@ const deleteItem = (req, res) => {
     return res.status(400).json({ message: "Invalid item ID" });
   }
 
-  return ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(404).json({ message: "Item not found" });
       }
-      return res.status(200).send({ data: item });
+      if (item.owner.toString() !== req.user._id.toString()) {
+        return res
+          .status(403)
+          .json({ message: "Forbidden: You can only delete your own items" });
+      }
+      return ClothingItem.findByIdAndDelete(itemId).then((deletedItem) =>
+        res.status(200).send({ data: deletedItem })
+      );
     })
     .catch((e) => {
       res.status(500).send({ message: "Error from deleteItem", e });
@@ -60,7 +72,7 @@ const likeItem = (req, res) => {
   const { itemId } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(400).json({ message: "Invalid item ID" });
+    return res.status(400).json({ message: "Invalid item ID 1" });
   }
 
   return ClothingItem.findByIdAndUpdate(
