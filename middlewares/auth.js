@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
-const { UNAUTHORIZED, FORBIDDEN } = require("../utils/constants");
+const { UNAUTHORIZED } = require("../utils/constants");
 
 module.exports = (req, res, next) => {
   let token;
@@ -8,8 +8,6 @@ module.exports = (req, res, next) => {
 
   if (authorization && authorization.startsWith("Bearer ")) {
     token = authorization.replace("Bearer ", "");
-  } else {
-    token = req.cookies.jwt;
   }
 
   console.log("Token:", token); // <-- Debugging line
@@ -25,6 +23,6 @@ module.exports = (req, res, next) => {
     req.user = payload; // Add user payload to request
     return next();
   } catch (err) {
-    return res.status(FORBIDDEN).json({ message: "Authorization required" }); // <-- use .json()
+    return res.status(UNAUTHORIZED).json({ message: "Authorization required" }); // <-- use .json()
   }
 };

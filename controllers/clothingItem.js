@@ -31,9 +31,7 @@ const createItem = (req, res) => {
 const getItems = (req, res) => {
   ClothingItem.find({})
     .then((items) => res.status(200).send(items))
-    .catch((e) =>
-      res.status(DEFAULT).send({ message: "Error from getItems", e })
-    );
+    .catch(() => res.status(DEFAULT).send({ message: "Error from getItems" }));
 };
 
 const deleteItem = (req, res) => {

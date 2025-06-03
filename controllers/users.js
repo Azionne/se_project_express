@@ -7,7 +7,6 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   DEFAULT,
-  FORBIDDEN,
   UNAUTHORIZED,
   CONFLICT,
 } = require("../utils/constants");
@@ -32,8 +31,8 @@ const getCurrentUser = (req, res) => {
             email: user.email,
           })
     )
-    .catch((e) =>
-      res.status(DEFAULT).json({ message: "Error from getCurrentUser", e })
+    .catch(() =>
+      res.status(DEFAULT).json({ message: "Error from getCurrentUser" })
     );
 };
 // POST /users
