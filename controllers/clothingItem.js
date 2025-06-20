@@ -12,11 +12,11 @@ const {
 
 // Ensure authentication middleware is used before these controllers in your route definitions
 const createItem = (req, res) => {
-  if (!req.user || !req.user._id) {
+  if (!req.user || !req.user.id) {
     return res.status(UNAUTHORIZED).json({ message: "Authorization required" });
   }
   const { name, weather, imageUrl } = req.body;
-  const owner = req.user._id;
+  const owner = req.user.id;
 
   return ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => res.status(201).json(item))
@@ -46,7 +46,7 @@ const deleteItem = (req, res) => {
       if (!item) {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
       }
-      if (item.owner.toString() !== req.user._id.toString()) {
+      if (item.owner.toString() !== req.user.id.toString()) {
         return res
           .status(FORBIDDEN)
           .json({ message: "Forbidden: You can only delete your own items" });
@@ -69,7 +69,7 @@ const likeItem = (req, res) => {
 
   return ClothingItem.findByIdAndUpdate(
     itemId,
-    { $addToSet: { likes: req.user._id } },
+    { $addToSet: { likes: req.user.id } },
     { new: true }
   )
     .then((item) => {
@@ -91,7 +91,7 @@ const dislikeItem = (req, res) => {
   }
   return ClothingItem.findByIdAndUpdate(
     itemId,
-    { $pull: { likes: req.user._id } },
+    { $pull: { likes: req.user.id } },
     { new: true }
   )
     .then((item) => {

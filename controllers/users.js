@@ -14,18 +14,17 @@ const {
 // GET /users
 
 const getCurrentUser = (req, res) => {
-  if (!req.user || !req.user._id) {
+  if (!req.user || !req.user.id) {
     return res
       .status(UNAUTHORIZED)
       .json({ message: "Authorization required " });
   }
-  console.log("req.user:", req.user);
-  return User.findById(req.user._id)
+  return User.findById(req.user.id)
     .then((user) =>
       !user
         ? res.status(UNAUTHORIZED).json({ message: "User not found" })
         : res.status(200).json({
-            _id: user._id,
+            id: user.id,
             name: user.name,
             avatar: user.avatar,
             email: user.email,
@@ -84,7 +83,7 @@ const createUser = (req, res) => {
               User.create({ name, avatar, email, password: hash }).then(
                 (user) =>
                   res.status(200).json({
-                    _id: user._id,
+                    id: user.id,
                     name: user.name,
                     avatar: user.avatar,
                     email: user.email,
@@ -128,7 +127,7 @@ const login = (req, res) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       // authentication successful! user is in the user variable
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+      const token = jwt.sign({ id: user.id }, JWT_SECRET, {
         expiresIn: "7d",
       });
       res.status(200).send({ token });
@@ -141,7 +140,7 @@ const login = (req, res) => {
 
 // PATCH
 const updateProfile = (req, res) => {
-  if (!req.user || !req.user._id) {
+  if (!req.user || !req.user.id) {
     return res.status(UNAUTHORIZED).json({ message: "Authorization required" });
   }
 
@@ -151,7 +150,7 @@ const updateProfile = (req, res) => {
   const { name, avatar } = req.body;
 
   return User.findByIdAndUpdate(
-    req.user._id,
+    req.user.id,
     { name, avatar },
     { new: true, runValidators: true }
   )
@@ -160,7 +159,7 @@ const updateProfile = (req, res) => {
         return res.status(NOT_FOUND).json({ message: "User not found" });
       }
       const updatedUser = {
-        _id: user._id,
+        id: user.id,
         name: user.name,
         avatar: user.avatar,
         email: user.email,
