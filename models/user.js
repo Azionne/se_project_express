@@ -11,10 +11,11 @@ const userSchema = new mongoose.Schema({
   },
   avatar: {
     type: String,
-    required: [true, "The avatar field is required."],
+    required: false, // Making avatar optional
     validate: {
       validator(value) {
-        return validator.isURL(value);
+        // Skip validation if value is empty (since it's optional)
+        return value ? validator.isURL(value) : true;
       },
       message: "You must enter a valid URL",
     },

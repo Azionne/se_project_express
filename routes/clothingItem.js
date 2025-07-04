@@ -9,14 +9,29 @@ const {
   dislikeItem,
 } = require("../controllers/clothingItem");
 const auth = require("../middlewares/auth");
+const {
+  validateClothingItem,
+  validateId,
+} = require("../middlewares/validation");
 
-// Protect the create route with auth middleware
-router.post("/", auth, createItem);
+// 🏥 HOSPITAL ANALOGY: Routes are like different hospital departments
+// Each department requires proper paperwork (validation) before treatment
 
-// You can also protect other routes as needed
+// Create new clothing item - requires auth and validation
+// Like requiring both insurance card (auth) AND completed intake form (validation)
+router.post("/", auth, validateClothingItem, createItem);
+
+// Get all items - no auth needed (public viewing)
 router.get("/", getItems);
-router.delete("/:itemId", auth, deleteItem);
-router.put("/:itemId/likes", auth, likeItem);
-router.delete("/:itemId/likes", auth, dislikeItem);
+
+// Delete item - requires auth and valid item ID
+// Like requiring insurance AND valid patient ID to cancel appointment
+router.delete("/:itemId", auth, validateId, deleteItem);
+
+// Like item - requires auth and valid item ID
+router.put("/:itemId/likes", auth, validateId, likeItem);
+
+// Dislike item - requires auth and valid item ID
+router.delete("/:itemId/likes", auth, validateId, dislikeItem);
 
 module.exports = router;

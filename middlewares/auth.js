@@ -1,10 +1,13 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 const { UNAUTHORIZED } = require("../utils/constants");
+const { UnauthorizedError } = require("../utils/errors");
 
 module.exports = (req, res, next) => {
   let token;
-  const { authorization } = req.headers;
+
+  // Safely check for authorization header
+  const authorization = req.headers && req.headers.authorization;
 
   // Check for token in Authorization header
   if (authorization && authorization.startsWith("Bearer ")) {
@@ -12,21 +15,19 @@ module.exports = (req, res, next) => {
   }
 
   // If no token in header, check for token in query parameters
-  if (!token && req.query.token) {
+  if (!token && req.query && req.query.token) {
     token = req.query.token;
   }
 
   // If no token in query, check for token in request body
-  if (!token && req.body.token) {
+  if (!token && req.body && req.body.token) {
     token = req.body.token;
   }
 
   console.log("Token:", token);
 
   if (!token) {
-    return res
-      .status(UNAUTHORIZED)
-      .json({ message: "Authorization required " });
+    return next(new UnauthorizedError("Authorization required"));
   }
 
   try {
@@ -34,6 +35,8 @@ module.exports = (req, res, next) => {
     req.user = payload; // Add user payload to request
     return next();
   } catch (err) {
-    return res.status(UNAUTHORIZED).json({ message: "Authorization required" }); // <-- use .json()
+    return next(
+      new UnauthorizedError("Authorization token is invalid or expired")
+    );
   }
 };
