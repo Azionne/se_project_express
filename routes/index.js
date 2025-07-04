@@ -9,6 +9,12 @@ const {
   validateUserAuth,
 } = require("../middlewares/validation");
 const { NOT_FOUND } = require("../utils/constants");
+const auth = require("../middlewares/auth");
+
+// Root path - requires auth to check authentication works
+router.get("/", auth, (req, res) => {
+  res.send({ message: "Authentication successful" });
+});
 
 // Public routes
 router.post("/signin", validateUserAuth, login);
