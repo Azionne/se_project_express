@@ -13,6 +13,13 @@ const { requestLogger, errorLogger } = require("./middlewares/logger");
 app.use(cors());
 app.use(express.json());
 
+// Crash test route for reviewer compliance
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
+
 // 1. Request logger - logs all incoming requests (like front desk registering patients)
 app.use(requestLogger);
 
