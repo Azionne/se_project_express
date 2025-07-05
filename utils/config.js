@@ -1,4 +1,5 @@
-const { JWT_SECRET = "secret-key" } = process.env;
+// Backend configuration for secrets and environment variables
 module.exports = {
-  JWT_SECRET,
+  JWT_SECRET: process.env.JWT_SECRET,
+  MONGODB_URI: process.env.MONGODB_URI,
 };
