@@ -8,14 +8,6 @@ const {
   NotFoundError,
 } = require("../utils/errors");
 
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  FORBIDDEN,
-  UNAUTHORIZED,
-} = require("../utils/constants");
-
 // Ensure authentication middleware is used before these controllers in your route definitions
 const createItem = (req, res, next) => {
   if (!req.user || !req.user.id) {

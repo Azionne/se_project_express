@@ -1,5 +1,4 @@
-// Custom Error Classes for consistent error handling
-
+// eslint-disable-next-line max-classes-per-file
 class BadRequestError extends Error {
   constructor(message = "Bad Request") {
     super(message);
@@ -7,7 +6,7 @@ class BadRequestError extends Error {
     this.name = "BadRequestError";
   }
 }
-
+// eslint-disable-next-line max-classes-per-file
 class UnauthorizedError extends Error {
   constructor(message = "Unauthorized") {
     super(message);
@@ -15,7 +14,7 @@ class UnauthorizedError extends Error {
     this.name = "UnauthorizedError";
   }
 }
-
+// eslint-disable-next-line max-classes-per-file
 class ForbiddenError extends Error {
   constructor(message = "Forbidden") {
     super(message);
@@ -23,7 +22,7 @@ class ForbiddenError extends Error {
     this.name = "ForbiddenError";
   }
 }
-
+// eslint-disable-next-line max-classes-per-file
 class NotFoundError extends Error {
   constructor(message = "Not Found") {
     super(message);
@@ -31,7 +30,7 @@ class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
-
+// eslint-disable-next-line max-classes-per-file
 class ConflictError extends Error {
   constructor(message = "Conflict") {
     super(message);

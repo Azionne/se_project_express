@@ -1,4 +1,3 @@
-const validator = require("validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
@@ -9,13 +8,6 @@ const {
   NotFoundError,
   ConflictError,
 } = require("../utils/errors");
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  DEFAULT,
-  UNAUTHORIZED,
-  CONFLICT,
-} = require("../utils/constants");
 
 // GET /users
 
@@ -66,10 +58,9 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
-        next(new BadRequestError("Invalid data provided"));
-      } else {
-        next(err);
+        return next(new BadRequestError("Invalid data provided"));
       }
+      return next(err);
     });
 };
 
@@ -91,7 +82,7 @@ const login = (req, res, next) => {
         return next(new UnauthorizedError("Invalid email or password"));
       }
       // Let middleware handle other errors
-      next(err);
+      return next(err);
     });
 };
 

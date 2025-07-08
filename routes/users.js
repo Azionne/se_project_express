@@ -13,6 +13,9 @@ const auth = require("../middlewares/auth");
 router.get("/me", auth, getCurrentUser);
 
 // Update current logged in profile
-router.patch("/me", auth, updateProfile);
+
+const { validateUserProfileUpdate } = require("../middlewares/validation");
+
+router.patch("/me", auth, validateUserProfileUpdate, updateProfile);
 
 module.exports = router;

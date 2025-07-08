@@ -32,7 +32,7 @@ const validateUserInfo = celebrate({
 
     email: Joi.string().required().email(),
 
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 });
 
@@ -40,7 +40,7 @@ const validateUserAuth = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
 
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
   }),
 });
 
@@ -56,6 +56,16 @@ const validateUserId = celebrate({
   }),
 });
 
+const validateUserProfileUpdate = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().required().min(2).max(30),
+    avatar: Joi.string().required().custom(validateURL).messages({
+      "string.empty": 'The "avatar" field must be filled in',
+      "string.uri": 'the "avatar" field must be a valid url',
+    }),
+  }),
+});
+
 module.exports = {
   validateClothingItem,
   validateUserInfo,
@@ -63,4 +73,5 @@ module.exports = {
   validateURL,
   validateId,
   validateUserId,
+  validateUserProfileUpdate,
 };

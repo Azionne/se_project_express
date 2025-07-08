@@ -8,7 +8,7 @@ const {
   validateUserInfo,
   validateUserAuth,
 } = require("../middlewares/validation");
-const { NOT_FOUND } = require("../utils/constants");
+
 const auth = require("../middlewares/auth");
 
 // Root path - requires auth to check authentication works
@@ -22,8 +22,10 @@ router.post("/signup", validateUserInfo, createUser);
 router.use("/items", clothingItem);
 router.use("/users", usersRoute);
 
-router.use((req, res) => {
-  res.status(NOT_FOUND).send({ message: "Router not found" });
+const { NotFoundError } = require("../utils/errors");
+
+router.use((req, res, next) => {
+  next(new NotFoundError("Router not found"));
 });
 
 module.exports = router;

@@ -2,18 +2,19 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 require("dotenv").config();
+
+const { errors } = require("celebrate");
 const mainRouter = require("./routes/index");
+
 const app = express();
 const { PORT = 3001 } = process.env;
 const errorHandler = require("./middlewares/errorHandler");
-
-const { errors } = require("celebrate");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 app.use(cors());
 app.use(express.json());
 
-// Crash test route for reviewer compliance
+// Crash test route for reviewer compliance, remove after review!!!
 app.get("/crash-test", () => {
   setTimeout(() => {
     throw new Error("Server will crash now");
