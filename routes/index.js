@@ -1,5 +1,5 @@
 const express = require("express");
-
+const { NotFoundError } = require("../utils/errors");
 const router = express.Router();
 const { login, createUser } = require("../controllers/users");
 const usersRoute = require("./users");
@@ -21,8 +21,6 @@ router.post("/signin", validateUserAuth, login);
 router.post("/signup", validateUserInfo, createUser);
 router.use("/items", clothingItem);
 router.use("/users", usersRoute);
-
-const { NotFoundError } = require("../utils/errors");
 
 router.use((req, res, next) => {
   next(new NotFoundError("Router not found"));
